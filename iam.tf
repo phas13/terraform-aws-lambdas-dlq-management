@@ -24,12 +24,11 @@ data "aws_iam_policy_document" "this" {
   statement {
     sid = "LambdaManagement"
     actions = [
-      "lambda:List*",
-      "lambda:Get*",
+      "lambda:ListFunctions",
       "lambda:UpdateFunctionConfiguration"
     ]
     resources = [
-      "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:*"
+      "*"
     ]
     effect = "Allow"
   }
