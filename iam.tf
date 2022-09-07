@@ -1,5 +1,5 @@
 resource "aws_iam_role" "this" {
-  name = "${local.project}-lambda-role"
+  name               = "${local.project}-lambda-role"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -29,11 +29,10 @@ data "aws_iam_policy_document" "this" {
       "lambda:UpdateFunctionConfiguration"
     ]
     resources = [
-      "arn:aws:lambda:${data.aws_region.current}:${data.aws_caller_identity.current}:function:*"
+      "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:*"
     ]
     effect = "Allow"
   }
-
   statement {
     sid = "SelfLoggingAccess"
     actions = [
@@ -41,20 +40,19 @@ data "aws_iam_policy_document" "this" {
       "logs:PutLogEvents"
     ]
     resources = [
-      "arn:aws:logs:${data.aws_region.current}:${data.aws_caller_identity.current}:log-group:/aws/lambda/${local.project}-${data.aws_region.current}:log-stream:*",
-      "arn:aws:logs:${data.aws_region.current}:${data.aws_caller_identity.current}:log-group:/aws/lambda/${local.project}-${data.aws_region.current}"
+      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.project}-${data.aws_region.current.name}:log-stream:*",
+      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.project}-${data.aws_region.current.name}"
     ]
   }
 }
 
 resource "aws_iam_policy" "this" {
-  name   = "${local.project}-lambda-policy"
+  name        = "${local.project}-lambda-policy"
   description = "Policy for Lambda DLQ management terraform module"
-  policy = data.aws_iam_policy_document.this.json
+  policy      = data.aws_iam_policy_document.this.json
 }
 
-# Attach the above IAM policy to the IAM role
 resource "aws_iam_role_policy_attachment" "this" {
   role       = aws_iam_role.this.name
-  policy_arn = aws_iam_policy.log-management-lambda-policy.arn
+  policy_arn = aws_iam_policy.this.arn
 }
