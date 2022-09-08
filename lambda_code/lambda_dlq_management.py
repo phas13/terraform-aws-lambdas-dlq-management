@@ -2,6 +2,10 @@ import boto3
 import os
 import traceback
 
+# If lambda have TAG ManagedBy = terraform, then skip, DLQ configuration in terraform
+# If lambda have DLQ configuration and have no TAG DLQAutomationMarker, then skip, DLQ configuration done by someone else
+# If lambda pass requirements and should have DLQ only for pass security conpliance, then add DLQ configuration. All lambdas will sent messages in single SQS queue
+
 def retrieve_lambdas(lm):
     # """
     # Retrieve all Lambda function  in a region
@@ -27,7 +31,7 @@ def configure_lambdas_dlq(lm, lambdas):
             response = lm.tag_resource(
                 Resource=lambdafunction['FunctionArn'],
                 Tags={
-                    "DLQAutomationMarker": "DLQ Managed by Lambda Automation module {}".format(DLQAutomationMarker)
+                    "DLQAutomationMarker": "{}".format(DLQAutomationMarker)
                 }
             )
             print(response)

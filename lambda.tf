@@ -7,7 +7,7 @@ data "archive_file" "this" {
 resource "aws_lambda_function" "this" {
   function_name    = "${local.project}-${data.aws_region.current.name}"
   handler          = "lambda_dlq_management.lambda_handler"
-  role             = aws_iam_role.this.arn
+  role             = aws_iam_role.lambda.arn
   runtime          = "python3.9"
   memory_size      = var.lambda_memory
   timeout          = var.lambda_timeout

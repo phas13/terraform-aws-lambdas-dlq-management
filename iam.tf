@@ -1,4 +1,4 @@
-resource "aws_iam_role" "this" {
+resource "aws_iam_role" "lambda" {
   name               = "${local.project}-lambda-role"
   assume_role_policy = <<EOF
 {
@@ -20,12 +20,12 @@ EOF
   }
 }
 
-data "aws_iam_policy_document" "this" {
+data "aws_iam_policy_document" "lambda" {
   statement {
     sid = "LambdaManagement"
     actions = [
       "lambda:ListFunctions",
-       "lambda:TagResource",
+      "lambda:TagResource",
       "lambda:UpdateFunctionConfiguration"
     ]
     resources = [
@@ -46,13 +46,13 @@ data "aws_iam_policy_document" "this" {
   }
 }
 
-resource "aws_iam_policy" "this" {
+resource "aws_iam_policy" "lambda" {
   name        = "${local.project}-lambda-policy"
   description = "Policy for Lambda DLQ management terraform module"
-  policy      = data.aws_iam_policy_document.this.json
+  policy      = data.aws_iam_policy_document.lambda.json
 }
 
 resource "aws_iam_role_policy_attachment" "this" {
-  role       = aws_iam_role.this.name
-  policy_arn = aws_iam_policy.this.arn
+  role       = aws_iam_role.lambda.name
+  policy_arn = aws_iam_policy.lambda.arn
 }
