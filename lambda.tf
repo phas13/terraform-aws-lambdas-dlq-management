@@ -15,10 +15,13 @@ resource "aws_lambda_function" "this" {
   source_code_hash = data.archive_file.this.output_base64sha256
   environment {
     variables = {
-      CURRENT_AWS_REGION = "${data.aws_region.current.name}"
+      PROJECT        = local.project
+      SKIP_TAG_NAME  = "ManagedBy"
+      SKIP_TAG_VALUE = "terraform"
     }
   }
   tags = {
     Description = "Lambda function for Lambda DLQ management terraform module"
+    ManagedBy   = "terraform"
   }
 }
