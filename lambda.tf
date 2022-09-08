@@ -18,6 +18,7 @@ resource "aws_lambda_function" "this" {
       PROJECT        = local.project
       SKIP_TAG_NAME  = "ManagedBy"
       SKIP_TAG_VALUE = "terraform"
+      SQS_QUEUE      = aws_sqs_queue.this.arn
     }
   }
   tags = {

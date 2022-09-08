@@ -1,0 +1,15 @@
+# ================
+# Github Terraform.gitignore template
+# ================
+#
+# from: https://github.com/github/gitignore/blob/8300d885653868b94e134e1950dea52b983e2cef/Terraform.gitignore
+
+# Local .terraform directories
+**/.terraform/*
+# Lock file is not helpful for us at this stage.
+.terraform.lock.hcl
+# .tfstate files
+*.tfstate
+*.tfstate.*
+.terraformrc
+terraform.rc

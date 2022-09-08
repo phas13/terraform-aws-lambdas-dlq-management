@@ -14,7 +14,7 @@ data "aws_iam_policy_document" "sqs" {
   }
 }
 
-resource "aws_sqs_queue" "terraform_queue" {
+resource "aws_sqs_queue" "this" {
   name   = "${local.project}-${data.aws_region.current.name}"
   policy = data.aws_iam_policy_document.sqs.json
   tags = {

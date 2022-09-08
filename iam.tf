@@ -24,7 +24,9 @@ data "aws_iam_policy_document" "lambda" {
   statement {
     sid = "LambdaManagement"
     actions = [
+      "lambda:GetFunctionConfiguration",
       "lambda:ListFunctions",
+      "lambda:ListTags",
       "lambda:TagResource",
       "lambda:UpdateFunctionConfiguration"
     ]

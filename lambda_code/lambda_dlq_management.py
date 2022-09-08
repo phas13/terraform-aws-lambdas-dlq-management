@@ -26,22 +26,42 @@ def retrieve_lambdas(lm):
 def configure_lambdas_dlq(lm, lambdas):
     for lambdafunction in lambdas:
         try:
-            print(f">> Processing function {lambdafunction['FunctionName']}...:")
-            DLQAutomationMarker=str(os.environ['PROJECT'])
-            response = lm.tag_resource(
-                Resource=lambdafunction['FunctionArn'],
-                Tags={
-                    "DLQAutomationMarker": "{}".format(DLQAutomationMarker)
-                }
+            print(f">> Processing function {lambdafunction['FunctionName']}:")
+            
+            responseDLQ = lm.get_function_configuration(
+                FunctionName=lambdafunction['FunctionName']
             )
-            print(response)
+            print(responseDLQ)
+            print(f"DLQ configuration:::::")
+            print(responseDLQ['DeadLetterConfig'])
+            print(f"DLQ configuration:::::")
+
+            responseListTags = lm.list_tags(
+                Resource=lambdafunction['FunctionArn']
+            )
+            # print(responseListTags['Tags'])
+            for (t, v) in (responseListTags['Tags'].items()):
+                # print(t)
+                # print(v)
+                if t == 'ManagedBy' and v == 'terraform':
+                    print(f"Skipping this lambda as terraform managed")
+
+            # Add DLQAutomationMarker Tag
+            # DLQAutomationMarker=str(os.environ['PROJECT'])
+            # responseTagResource = lm.tag_resource(
+            #     Resource=lambdafunction['FunctionArn'],
+            #     Tags={
+            #         "DLQAutomationMarker": "{}".format(DLQAutomationMarker)
+            #     }
+            # )
+            # print(responseTagResource)
         except Exception as e:
             print(f"Ran into error when TAGging function {lambdafunction['FunctionName']}")
             print(traceback.format_exc())
     print(f">>> Done configuring lambda functions for {lm.meta.region_name} <<<")
 
 def lambda_handler(event, context):
-    print(">>> START EXECUTION <<<")
+    # print(">>> START EXECUTION <<<")
 
     print(">>> Instantiate Lambda client in current region <<<")
     lm = boto3.client("lambda")
@@ -53,5 +73,5 @@ def lambda_handler(event, context):
     print(">>> Processing Lambda functions in region <<<")
     configure_lambdas_dlq(lm, retrieve_lambdas(lm))
 
-    print(">>> END EXECUTION <<<")
+    # print(">>> END EXECUTION <<<")
     return True
