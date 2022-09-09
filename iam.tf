@@ -1,3 +1,6 @@
+#
+# IaM Configuration for management lambda finction
+#
 resource "aws_iam_role" "lambda" {
   name               = "${local.project}-lambda-role"
   assume_role_policy = <<EOF
@@ -57,4 +60,25 @@ resource "aws_iam_policy" "lambda" {
 resource "aws_iam_role_policy_attachment" "this" {
   role       = aws_iam_role.lambda.name
   policy_arn = aws_iam_policy.lambda.arn
+}
+
+#
+# IaM for Lambda DLQ Configuration
+#
+
+data "aws_iam_policy_document" "sqs_usage" {
+  statement {
+    sid    = "SQSUsage"
+    effect = "Allow"
+    actions = [
+      "sqs:SendMessage"
+    ]
+    resources = ["${aws_sqs_queue.this.arn}"]
+  }
+}
+
+resource "aws_iam_policy" "sqs_usage" {
+  name        = "${local.project}-sqs-lambda-policy"
+  description = "Allow Lambdas managed by module to send messages to SQS queus"
+  policy      = data.aws_iam_policy_document.sqs_usage.json
 }

@@ -15,10 +15,11 @@ resource "aws_lambda_function" "this" {
   source_code_hash = data.archive_file.this.output_base64sha256
   environment {
     variables = {
-      PROJECT        = local.project
+      PROJECT        = "${local.project}-${data.aws_region.current.name}"
       SKIP_TAG_NAME  = "ManagedBy"
       SKIP_TAG_VALUE = "terraform"
-      SQS_QUEUE      = aws_sqs_queue.this.arn
+      SQS_QUEUE_ARN  = aws_sqs_queue.this.arn
+      SQS_POLICY_ARN = aws_iam_policy.sqs_usage.arn
     }
   }
   tags = {
