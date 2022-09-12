@@ -29,7 +29,7 @@ resource "aws_lambda_function" "this" {
 }
 
 # resource "aws_lambda_function" "test" {
-#   count = 10
+#   count            = 10
 #   function_name    = "${local.project}-${data.aws_region.current.name}-count-${count.index}"
 #   handler          = "lambda_dlq_management.lambda_handler"
 #   role             = aws_iam_role.lambda.arn
