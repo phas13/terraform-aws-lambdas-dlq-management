@@ -31,7 +31,8 @@ data "aws_iam_policy_document" "lambda" {
       "lambda:ListFunctions",
       "lambda:ListTags",
       "lambda:TagResource",
-      "lambda:UpdateFunctionConfiguration"
+      "lambda:UpdateFunctionConfiguration",
+      "iam:DetachRolePolicy"
     ]
     resources = [
       "*"
