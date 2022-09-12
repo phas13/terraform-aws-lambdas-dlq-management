@@ -39,6 +39,18 @@ data "aws_iam_policy_document" "lambda" {
     effect = "Allow"
   }
   statement {
+    sid = "IaMCreatePolicy"
+    actions = [
+      "iam:CreatePolicy",
+      "iam:GetPolicy",
+      "iam:AttachRolePolicy"
+    ]
+    resources = [
+      "*"
+    ]
+    effect = "Allow"
+  }
+  statement {
     sid = "SelfLoggingAccess"
     actions = [
       "logs:CreateLogStream",
@@ -66,19 +78,19 @@ resource "aws_iam_role_policy_attachment" "this" {
 # IaM for Lambda DLQ Configuration
 #
 
-data "aws_iam_policy_document" "sqs_usage" {
-  statement {
-    sid    = "SQSUsage"
-    effect = "Allow"
-    actions = [
-      "sqs:SendMessage"
-    ]
-    resources = ["${aws_sqs_queue.this.arn}"]
-  }
-}
+# data "aws_iam_policy_document" "sqs_usage" {
+#   statement {
+#     sid    = "SQSUsage"
+#     effect = "Allow"
+#     actions = [
+#       "sqs:SendMessage"
+#     ]
+#     resources = ["${aws_sqs_queue.this.arn}"]
+#   }
+# }
 
-resource "aws_iam_policy" "sqs_usage" {
-  name        = "${local.project}-sqs-lambda-policy"
-  description = "Allow Lambdas managed by module to send messages to SQS queus"
-  policy      = data.aws_iam_policy_document.sqs_usage.json
-}
+# resource "aws_iam_policy" "sqs_usage" {
+#   name        = "${local.project}-sqs-lambda-policy"
+#   description = "Allow Lambdas managed by module to send messages to SQS queus"
+#   policy      = data.aws_iam_policy_document.sqs_usage.json
+# }
