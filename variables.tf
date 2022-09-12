@@ -1,4 +1,5 @@
 locals {
+  # project - name of management lambda function and 
   project = "terraform-aws-lambda-dlq-management"
 }
 
