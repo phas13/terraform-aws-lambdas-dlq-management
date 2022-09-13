@@ -31,8 +31,8 @@ data "aws_iam_policy_document" "lambda" {
       "lambda:ListFunctions",
       "lambda:ListTags",
       "lambda:TagResource",
-      "lambda:UpdateFunctionConfiguration",
-      "iam:DetachRolePolicy"
+      "lambda:UntagResource",
+      "lambda:UpdateFunctionConfiguration"
     ]
     resources = [
       "*"
@@ -44,11 +44,19 @@ data "aws_iam_policy_document" "lambda" {
     actions = [
       "iam:CreatePolicy",
       "iam:GetPolicy",
-      "iam:AttachRolePolicy"
+      "iam:AttachRolePolicy",
+      "iam:DetachRolePolicy",
+      "iam:DeletePolicy"
     ]
     resources = [
       "*"
     ]
+    effect = "Allow"
+  }
+  statement {
+    sid = "SQSUsage"
+    actions = ["sqs:SendMessage"]
+    resources = ["${aws_sqs_queue.this.arn}"]
     effect = "Allow"
   }
   statement {

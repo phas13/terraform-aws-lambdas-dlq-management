@@ -113,18 +113,24 @@ def configure_lambdas_dlq(lm, iam, lambdas):
                     print(f"We skip this function because it has DLQ config or managed by other tool that should provide DLQ config")
             else:
                 if marker_remove_dlq == 1 and marker_managed == 0:
-                    print(f"Remove DeadLetterConfig...")
-                    responseRemoveDeadLetterConfig = lm.update_function_configuration(
-                        FunctionName=lambdafunction['FunctionName'],
-                        DeadLetterConfig={}
-                    )
-                    print(responseRemoveDeadLetterConfig)
-                    print(f"Remove policy {policyARN} from role {lambdafunction['Role']}")
-                    responseDetachPolicyFromRole = iam.detach_role_policy(
-                        RoleName=roleName,
-                        PolicyArn=policyARN
-                    )
-                    print(responseDetachPolicyFromRole)
+                    try:
+                        print(f"Remove DeadLetterConfig...")
+                        responseRemoveDeadLetterConfig = lm.update_function_configuration(
+                            FunctionName=lambdafunction['FunctionName'],
+                            DeadLetterConfig={}
+                        )
+                        print(responseRemoveDeadLetterConfig)
+                    except:
+                        print((f"ERROR Removing DeadLetterConfig"))
+                    try:
+                        print(f"Remove policy {policyARN} from role {lambdafunction['Role']}")
+                        responseDetachPolicyFromRole = iam.detach_role_policy(
+                            RoleName=roleName,
+                            PolicyArn=policyARN
+                        )
+                        print(responseDetachPolicyFromRole)
+                    except:
+                        print((f"Policy is not attached or does not exist"))
                     print(f"Remove Tag DLQAutomationMarker...")
                     responseRemoveTag = lm.untag_resource(
                         Resource=lambdafunction['FunctionArn'],
@@ -138,15 +144,26 @@ def configure_lambdas_dlq(lm, iam, lambdas):
             print(f"Ran into error when processing function {lambdafunction['FunctionName']}")
             print(traceback.format_exc())
     print(f">>> Done configuring lambda functions for {lm.meta.region_name} <<<")
-    print(f"")
+
+    if os.environ.get("ENABLE_DLQ_MANAGEMENT") == "false":
+        # Remove policy for lambdas to access SQS queue.
+        print (f">> Remove IaM Policy with lambda access to SQS Queue")
+        try:
+          print("Check if policy" + policyARN + " exist:")
+          responseDeletePolicy = iam.delete_policy(
+              PolicyArn=policyARN
+          )
+          print(responseDeletePolicy)
+        except:
+            print("Policy " + policyARN + " does not exist, or can not be deleted")
 
 def lambda_handler(event, context):
     lm = boto3.client("lambda")
     iam = boto3.client("iam")
     if os.environ.get("ENABLE_DLQ_MANAGEMENT") == "true":
-        print("   SETUP DLQ FOR LAMBDA FUNCTIONS")
+        print("       SETUP DLQ FOR LAMBDA FUNCTIONS")
     else:
-        print("   REMOVE DLQ FOR LAMBDA FUNCTIONS")
+        print("       REMOVE DLQ FOR LAMBDA FUNCTIONS")
     print(f">>> Processing Lambda functions in region {lm.meta.region_name} <<<")
     configure_lambdas_dlq(lm, iam, retrieve_lambdas(lm))
     return True

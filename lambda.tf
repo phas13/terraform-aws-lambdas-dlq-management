@@ -13,6 +13,9 @@ resource "aws_lambda_function" "this" {
   timeout          = var.lambda_timeout
   filename         = data.archive_file.this.output_path
   source_code_hash = data.archive_file.this.output_base64sha256
+  dead_letter_config {
+    target_arn = aws_sqs_queue.this.arn
+  }
   environment {
     variables = {
       ENABLE_DLQ_MANAGEMENT = false
