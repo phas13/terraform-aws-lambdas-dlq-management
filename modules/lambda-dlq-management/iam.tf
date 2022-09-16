@@ -2,7 +2,7 @@
 # IaM Configuration for management lambda finction
 #
 resource "aws_iam_role" "lambda" {
-  name               = "${local.project}-lambda-role"
+  name               = local.resource_id
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -19,7 +19,8 @@ resource "aws_iam_role" "lambda" {
 }
 EOF
   tags = {
-    Description = "Role for Lambda DLQ management terraform module"
+    Description = "Role for Lambda DLQ management terraform module ${local.resource_id}"
+    ManagedBy   = "terraform"
   }
 }
 
@@ -54,10 +55,10 @@ data "aws_iam_policy_document" "lambda" {
     effect = "Allow"
   }
   statement {
-    sid = "SQSUsage"
-    actions = ["sqs:SendMessage"]
+    sid       = "SQSUsage"
+    actions   = ["sqs:SendMessage"]
     resources = ["${aws_sqs_queue.this.arn}"]
-    effect = "Allow"
+    effect    = "Allow"
   }
   statement {
     sid = "SelfLoggingAccess"
@@ -66,40 +67,19 @@ data "aws_iam_policy_document" "lambda" {
       "logs:PutLogEvents"
     ]
     resources = [
-      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.project}-${data.aws_region.current.name}:log-stream:*",
-      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.project}-${data.aws_region.current.name}"
+      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.resource_id}:log-stream:*",
+      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.resource_id}"
     ]
   }
 }
 
 resource "aws_iam_policy" "lambda" {
-  name        = "${local.project}-lambda-policy"
-  description = "Policy for Lambda DLQ management terraform module"
+  name        = local.resource_id
+  description = "Policy for Lambda DLQ management terraform module ${local.resource_id}"
   policy      = data.aws_iam_policy_document.lambda.json
 }
 
-resource "aws_iam_role_policy_attachment" "this" {
+resource "aws_iam_role_policy_attachment" "lambda" {
   role       = aws_iam_role.lambda.name
   policy_arn = aws_iam_policy.lambda.arn
 }
-
-#
-# IaM for Lambda DLQ Configuration
-#
-
-# data "aws_iam_policy_document" "sqs_usage" {
-#   statement {
-#     sid    = "SQSUsage"
-#     effect = "Allow"
-#     actions = [
-#       "sqs:SendMessage"
-#     ]
-#     resources = ["${aws_sqs_queue.this.arn}"]
-#   }
-# }
-
-# resource "aws_iam_policy" "sqs_usage" {
-#   name        = "${local.project}-sqs-lambda-policy"
-#   description = "Allow Lambdas managed by module to send messages to SQS queus"
-#   policy      = data.aws_iam_policy_document.sqs_usage.json
-# }

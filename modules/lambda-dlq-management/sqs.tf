@@ -9,15 +9,16 @@ data "aws_iam_policy_document" "sqs" {
     condition {
       test     = "StringEquals"
       variable = "aws:RequestTag/DLQAutomationMarker"
-      values   = ["${local.project}"]
+      values   = ["${local.resource_id}"]
     }
   }
 }
 
 resource "aws_sqs_queue" "this" {
-  name   = "${local.project}-${data.aws_region.current.name}"
+  name   = local.resource_id
   policy = data.aws_iam_policy_document.sqs.json
   tags = {
-    Description = "DLQ for all lambdas managed by ${local.project}"
+    Description = "SQS queue for all lambdas managed by ${local.resource_id}"
+    ManagedBy   = "terraform"
   }
 }

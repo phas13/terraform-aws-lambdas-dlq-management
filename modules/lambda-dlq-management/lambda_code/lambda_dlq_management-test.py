@@ -17,7 +17,7 @@ def retrieve_lambdas(lm):
 
 def configure_lambdas_dlq(lm, iam, lambdas):
 
-    policyName = str(os.environ.get("PROJECT"))
+    policyName = str(os.environ.get("RESOURCE_ID"))
     awsAccountId = str(boto3.client('sts').get_caller_identity()['Account'])
     policyARN = "arn:aws:iam::"+awsAccountId+":policy/"+policyName
 
@@ -81,8 +81,8 @@ def configure_lambdas_dlq(lm, iam, lambdas):
                 if t == os.environ.get("SKIP_TAG_NAME") and v == os.environ.get("SKIP_TAG_VALUE"):
                     print("* " + str(os.environ.get("SKIP_TAG_NAME")) + ": " + str(os.environ.get("SKIP_TAG_VALUE")))
                     marker_managed = 1
-                if t == "DLQAutomationMarker" and v == str(os.environ['PROJECT']):
-                    print("* DLQAutomationMarker: " + str(os.environ.get("PROJECT")))
+                if t == "DLQAutomationMarker" and v == str(os.environ['RESOURCE_ID']):
+                    print("* DLQAutomationMarker: " + str(os.environ.get("RESOURCE_ID")))
                     marker_remove_dlq = 1
 
             if os.environ.get("ENABLE_DLQ_MANAGEMENT") == "true":
@@ -105,7 +105,7 @@ def configure_lambdas_dlq(lm, iam, lambdas):
                     responseAddTag = lm.tag_resource(
                         Resource=lambdafunction['FunctionArn'],
                         Tags={
-                            "DLQAutomationMarker": "{}".format(str(os.environ['PROJECT']))
+                            "DLQAutomationMarker": "{}".format(str(os.environ['RESOURCE_ID']))
                         }
                     )
                     print(responseAddTag)
@@ -117,7 +117,9 @@ def configure_lambdas_dlq(lm, iam, lambdas):
                         print(f"Remove DeadLetterConfig...")
                         responseRemoveDeadLetterConfig = lm.update_function_configuration(
                             FunctionName=lambdafunction['FunctionName'],
-                            DeadLetterConfig={}
+                            DeadLetterConfig={
+                                'TargetArn': ''
+                            }
                         )
                         print(responseRemoveDeadLetterConfig)
                     except:
@@ -165,5 +167,5 @@ def lambda_handler(event, context):
     else:
         print("       REMOVE DLQ FOR LAMBDA FUNCTIONS")
     print(f">>> Processing Lambda functions in region {lm.meta.region_name} <<<")
-    configure_lambdas_dlq(lm, iam, retrieve_lambdas(lm))
+    # configure_lambdas_dlq(lm, iam, retrieve_lambdas(lm))
     return True

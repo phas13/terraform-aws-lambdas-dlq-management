@@ -1,13 +1,13 @@
 resource "aws_cloudwatch_log_group" "this" {
   name = "/aws/lambda/${aws_lambda_function.this.function_name}"
   tags = {
-    Description = "CloudWatch LogGroup for Lambda DLQ management terraform module"
+    Description = "CloudWatch LogGroup for Lambda DLQ management terraform module ${local.resource_id}"
   }
 }
 
 resource "aws_cloudwatch_event_rule" "this" {
   name                = aws_lambda_function.this.function_name
-  description         = "CloudWatch Event Rule for Lambda DLQ management terraform module"
+  description         = "CloudWatch Event Rule for Lambda DLQ management terraform module ${local.resource_id}"
   schedule_expression = var.invocation_rate
 }
 

@@ -1,6 +1,19 @@
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
 locals {
-  # project - name of management lambda function and 
-  project = "terraform-aws-lambda-dlq-management"
+  resource_id = "${var.module_id}-${data.aws_region.current.name}"
+}
+
+variable "enable_dlq_management" {
+  type    = bool
+  default = true
+}
+
+variable "module_id" {
+  type        = string
+  default     = "terraform-aws-lambda-dlq-management"
+  description = "Name that will be applied to most resources created by module, + region"
 }
 
 variable "invocation_rate" {
@@ -22,6 +35,18 @@ variable "lambda_memory" {
 
 variable "lambda_timeout" {
   type        = number
-  default     = 30
+  default     = 180
   description = "Amount of time, in seconds, for the Lambda function timeout. Increase if receiving timeout errors."
+}
+
+variable "skip_tag_name" {
+  type        = string
+  default     = "ManagedBy"
+  description = "Tag that should be skipped by automation module"
+}
+
+variable "skip_tag_value" {
+  type        = string
+  default     = "terraform"
+  description = "Tag value that should be skipped by automation module"
 }
